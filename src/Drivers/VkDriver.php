@@ -20,7 +20,7 @@ use BotMan\BotMan\Messages\Outgoing\Question;
  * Class VkDriver
  * @package VkBotMan\Drivers
  */
-class VkDriver extends HttpDriver
+class VkDriver extends HttpDriver implements VerifiesService
 {
     // TODO make config parameters from those const-s
     const DRIVER_NAME = 'Vk';
@@ -145,6 +145,20 @@ class VkDriver extends HttpDriver
 
         return Answer::create($message->getText())->setMessage($message);
     }
+
+    public function verifyRequest(Request $request)
+    {
+        $request_array = $request->toArray();
+        if (
+            isset($request_array['type'])
+            && ($request_array['type'] == 'confirmation')
+            && isset($request_array['group_id'])
+            && ($request_array['group_id'] == $this->config->get('group_id'))
+        ) {
+            return Response::create($this->config->get('verification'))->send();
+        }
+    }
+
 
     /**
      * @param string|\BotMan\BotMan\Messages\Outgoing\Question $message
