@@ -55,7 +55,7 @@ class VkDriver extends HttpDriver implements VerifiesService
      */
     public function matchesRequest()
     {
-        
+
         if ($this->payload->get('type') === self::CONFIRMATION_EVENT) {
             echo $this->config->get('verification');
         }
@@ -77,7 +77,7 @@ class VkDriver extends HttpDriver implements VerifiesService
         $parameters = [
             'type' => 'typing',
             'peer_id' => $matchingMessage->getSender(),
-            'access_token' => getenv('VK_GROUP_ACCESS_TOKEN'),
+            'access_token' => $this->config->get('token'),
             'v' => self::API_VERSION,
         ];
 
@@ -178,7 +178,7 @@ class VkDriver extends HttpDriver implements VerifiesService
         //TODO VK_GROUP_ACCESS_TOKEN in config
         $parameters = array_merge_recursive([
             'peer_id' => $matchingMessage->getSender(),
-            'access_token' => getenv('VK_GROUP_ACCESS_TOKEN'),
+            'access_token' => $this->config->get('token'),
             'v' => self::API_VERSION,
         ], $additionalParameters);
 
