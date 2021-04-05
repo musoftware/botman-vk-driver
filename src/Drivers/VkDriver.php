@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Messages\Outgoing\Question;
+use VK\Client\VKApiClient;
 
 /**
  * Class VkDriver
@@ -55,10 +56,6 @@ class VkDriver extends HttpDriver implements VerifiesService
      */
     public function matchesRequest()
     {
-
-        if ($this->payload->get('type') === self::CONFIRMATION_EVENT) {
-            echo $this->config->get('verification');
-        }
 
         if (!is_null($this->event->get('text')) && count($this->event->get('attachments')) === 0) {
             return true;
@@ -192,7 +189,7 @@ class VkDriver extends HttpDriver implements VerifiesService
         } elseif ($message instanceof OutgoingMessage) {
 
 
-            $vk = new VK\Client\VKApiClient('5.101');
+            $vk = new VKApiClient('5.101');
       
             if ($message->getAttachment() !== null) {
                 $attachment = $message->getAttachment();
