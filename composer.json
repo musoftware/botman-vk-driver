@@ -20,6 +20,7 @@
         "guzzlehttp/guzzle": "^6.3",
         "illuminate/support": "^5.7",
         "symfony/cache": "~3.4|~4.0",
+        "vkcom/vk-php-sdk": "^5.101",
         "ext-json": "*"
     },
     "autoload": {

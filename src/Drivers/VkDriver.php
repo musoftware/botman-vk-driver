@@ -190,6 +190,53 @@ class VkDriver extends HttpDriver implements VerifiesService
             ], JSON_UNESCAPED_UNICODE);
 
         } elseif ($message instanceof OutgoingMessage) {
+
+
+            $vk = new VK\Client\VKApiClient('5.101');
+      
+            if ($message->getAttachment() !== null) {
+                $attachment = $message->getAttachment();
+                $parameters['caption'] = $message->getText();
+                if ($attachment instanceof Image) {
+                    $temp_file = tempnam(sys_get_temp_dir(), 'Tux');
+
+                    file_put_contents(
+                        $temp_file,
+                        file_get_contents($attachment->getUrl())
+                    );
+
+                    $address = $vk->photos()->getMessagesUploadServer($this->config->get('token'));
+                    $photo = $this->vk->getRequest()->upload($address['upload_url'], 'photo', $temp_file);
+
+                    $response_save_photo = $this->vk->photos()->saveMessagesPhoto($this->config->get('token'), [
+                        'server' => $photo['server'],
+                        'photo' => $photo['photo'],
+                        'hash' => $photo['hash'],
+                    ]);
+
+                    $parameters['attachment'] = 'photo' . $response_save_photo[0]['owner_id'] . '_' . $response_save_photo[0]['id'];
+
+                    unlink($temp_file);
+                } elseif ($attachment instanceof Video) {
+                    $this->endpoint = 'sendVideo';
+                    $parameters['video'] = $attachment->getUrl();
+                } elseif ($attachment instanceof Audio) {
+                    $this->endpoint = 'sendAudio';
+                    $parameters['audio'] = $attachment->getUrl();
+                } elseif ($attachment instanceof File) {
+                    $this->endpoint = 'sendDocument';
+                    $parameters['document'] = $attachment->getUrl();
+                } elseif ($attachment instanceof Location) {
+                    $this->endpoint = 'sendLocation';
+                    $parameters['latitude'] = $attachment->getLatitude();
+                    $parameters['longitude'] = $attachment->getLongitude();
+                    if (isset($parameters['title'], $parameters['address'])) {
+                        $this->endpoint = 'sendVenue';
+                    }
+                }
+            }
+
+
             $parameters['message'] = $message->getText();
         } else {
             $parameters['message'] = $message;
