@@ -55,6 +55,11 @@ class VkDriver extends HttpDriver implements VerifiesService
      */
     public function matchesRequest()
     {
+        
+        if ($this->payload->get('type') === self::CONFIRMATION_EVENT) {
+            echo $this->config->get('verification');
+        }
+
         if (!is_null($this->event->get('text')) && count($this->event->get('attachments')) === 0) {
             return true;
         } else {
@@ -96,6 +101,8 @@ class VkDriver extends HttpDriver implements VerifiesService
                     $this->event)
             ];
         }
+       
+
         if (count($this->messages) === 0) {
             $this->messages = [new IncomingMessage('', '', '')];
         }
