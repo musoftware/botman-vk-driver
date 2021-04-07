@@ -194,18 +194,18 @@ class VkDriver extends HttpDriver implements VerifiesService
             if ($message->getAttachment() !== null) {
                 $attachment = $message->getAttachment();
                 $parameters['caption'] = $message->getText();
-                if ($attachment instanceof Image) {
-                    $temp_file = tempnam(sys_get_temp_dir(), 'Tux');
+                if ($attachment instanceof \BotMan\BotMan\Messages\Attachments\Image) {
+                    $temp_file = tempnam(sys_get_temp_dir(), 'Tux') . '.jpg';
 
                     file_put_contents(
                         $temp_file,
                         file_get_contents($attachment->getUrl())
                     );
-
+                    try {
                     $address = $vk->photos()->getMessagesUploadServer($this->config->get('token'));
-                    $photo = $this->vk->getRequest()->upload($address['upload_url'], 'photo', $temp_file);
+                    $photo = $vk->getRequest()->upload($address['upload_url'], 'photo', $temp_file);
 
-                    $response_save_photo = $this->vk->photos()->saveMessagesPhoto($this->config->get('token'), [
+                    $response_save_photo = $vk->photos()->saveMessagesPhoto($this->config->get('token'), [
                         'server' => $photo['server'],
                         'photo' => $photo['photo'],
                         'hash' => $photo['hash'],
@@ -214,16 +214,21 @@ class VkDriver extends HttpDriver implements VerifiesService
                     $parameters['attachment'] = 'photo' . $response_save_photo[0]['owner_id'] . '_' . $response_save_photo[0]['id'];
 
                     unlink($temp_file);
-                } elseif ($attachment instanceof Video) {
+                    } catch (Exception $ex) {
+                    } catch (VKApiMessagesDenySendException | VKApiException | VKClientException $e) {
+                    } finally {
+                        unlink($temp_file);
+                    }
+                } elseif ($attachment instanceof \BotMan\BotMan\Messages\Attachments\Video) {
                     $this->endpoint = 'sendVideo';
                     $parameters['video'] = $attachment->getUrl();
-                } elseif ($attachment instanceof Audio) {
+                } elseif ($attachment instanceof \BotMan\BotMan\Messages\Attachments\Audio) {
                     $this->endpoint = 'sendAudio';
                     $parameters['audio'] = $attachment->getUrl();
-                } elseif ($attachment instanceof File) {
+                } elseif ($attachment instanceof \BotMan\BotMan\Messages\Attachments\File) {
                     $this->endpoint = 'sendDocument';
                     $parameters['document'] = $attachment->getUrl();
-                } elseif ($attachment instanceof Location) {
+                } elseif ($attachment instanceof \BotMan\BotMan\Messages\Attachments\Location) {
                     $this->endpoint = 'sendLocation';
                     $parameters['latitude'] = $attachment->getLatitude();
                     $parameters['longitude'] = $attachment->getLongitude();
