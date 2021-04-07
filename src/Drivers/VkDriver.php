@@ -219,22 +219,32 @@ class VkDriver extends HttpDriver implements VerifiesService
                     } finally {
                         unlink($temp_file);
                     }
-                } elseif ($attachment instanceof \BotMan\BotMan\Messages\Attachments\Video) {
-                    $this->endpoint = 'sendVideo';
-                    $parameters['video'] = $attachment->getUrl();
-                } elseif ($attachment instanceof \BotMan\BotMan\Messages\Attachments\Audio) {
-                    $this->endpoint = 'sendAudio';
-                    $parameters['audio'] = $attachment->getUrl();
-                } elseif ($attachment instanceof \BotMan\BotMan\Messages\Attachments\File) {
-                    $this->endpoint = 'sendDocument';
-                    $parameters['document'] = $attachment->getUrl();
-                } elseif ($attachment instanceof \BotMan\BotMan\Messages\Attachments\Location) {
-                    $this->endpoint = 'sendLocation';
-                    $parameters['latitude'] = $attachment->getLatitude();
-                    $parameters['longitude'] = $attachment->getLongitude();
-                    if (isset($parameters['title'], $parameters['address'])) {
-                        $this->endpoint = 'sendVenue';
+                } elseif ($attachment instanceof Video) {
+                    $temp_file = tempnam(sys_get_temp_dir(), 'Tux') . '.mp4';
+                    file_put_contents(
+                        $temp_file,
+                        file_get_contents($attachment->getUrl())
+                    );
+                    try {
+                        $address = $this->vk->video()->save($this->config->get('token'), [
+                            'name' => 'My video',
+                        ]);
+                        $video = $this->vk->getRequest()->upload($address['upload_url'], 'video_file', $temp_file);
+                        $parameters['attachment'] = 'video' . $address['owner_id'] . '_' . $video['video_id'];
+                    } catch (Exception $ex) {
+                    } catch (VKApiMessagesDenySendException | VKApiException | VKClientException $e) {
+                    } finally {
+                        if (file_exists($temp_file)) {
+                            unlink($temp_file);
+                        }
                     }
+                } elseif ($attachment instanceof Audio) {
+                    $parameters['message'] = $message->getText() . ' ' . $attachment->getUrl();
+                } elseif ($attachment instanceof File) {
+                    $parameters['message'] = $message->getText() . ' ' . $attachment->getUrl();
+                } elseif ($attachment instanceof Location) {
+                    $parameters['message'] = $message->getText() . ' ' .
+                        'https://www.google.com/maps/search/?api=1&query=' . $attachment->getLatitude() . ',' . $attachment->getLongitude();
                 }
             }
 
