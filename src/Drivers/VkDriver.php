@@ -17,6 +17,7 @@ use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Messages\Outgoing\Question;
 use VK\Client\VKApiClient;
 
+ 
 /**
  * Class VkDriver
  * @package VkBotMan\Drivers
@@ -250,6 +251,13 @@ class VkDriver extends HttpDriver implements VerifiesService
 
 
             $parameters['message'] = $message->getText();
+        
+        } elseif ($message instanceof MessageParameters) {
+
+            foreach($message->toArray() as $key=>$value) {
+                $parameters[$key] = $value;
+            }
+            
         } else {
             $parameters['message'] = $message;
         }
