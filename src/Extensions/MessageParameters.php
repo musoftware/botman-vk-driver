@@ -3,7 +3,7 @@
 namespace VkBotMan\Extensions;
 
 /**
- * Class KeyboardButton.
+ * Class MessageParameters.
  */
 class MessageParameters implements \JsonSerializable
 {
