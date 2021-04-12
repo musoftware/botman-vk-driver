@@ -4,8 +4,14 @@
 namespace VkBotMan\Drivers;
 
 
+
 use BotMan\BotMan\Drivers\HttpDriver;
 use BotMan\BotMan\Interfaces\UserInterface;
+use BotMan\BotMan\Interfaces\VerifiesService;
+use BotMan\BotMan\Messages\Attachments\Audio;
+use BotMan\BotMan\Messages\Attachments\File;
+use BotMan\BotMan\Messages\Attachments\Location;
+use BotMan\BotMan\Messages\Attachments\Video;
 use BotMan\BotMan\Messages\Incoming\IncomingMessage;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
 use BotMan\BotMan\Users\User;
@@ -16,8 +22,11 @@ use Symfony\Component\HttpFoundation\Response;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Messages\Outgoing\Question;
 use VK\Client\VKApiClient;
+use VK\Exceptions\Api\VKApiMessagesDenySendException;
+use VK\Exceptions\VKApiException;
+use VK\Exceptions\VKClientException;
+use VkBotMan\Extensions\MessageParameters;
 
- 
 /**
  * Class VkDriver
  * @package VkBotMan\Drivers
